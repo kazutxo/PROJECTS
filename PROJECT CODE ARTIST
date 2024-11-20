@@ -83,27 +83,44 @@ def add_sale():
     conn.close()
     print("Sale recorded successfully!")
 
-# Function to delete an artist
+# Function to delete an artist by ID or name
 def delete_artist():
-    artist_id = int(input("Enter artist ID to delete: "))
-    
+    choice = input("Delete by (1) ID or (2) Name? Enter choice: ")
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM artists WHERE id = %s", (artist_id,))
+    
+    if choice == '1':
+        artist_id = int(input("Enter artist ID to delete: "))
+        cursor.execute("DELETE FROM artists WHERE id = %s", (artist_id,))
+    elif choice == '2':
+        name = input("Enter artist's name to delete: ")
+        cursor.execute("DELETE FROM artists WHERE name = %s", (name,))
+    else:
+        print("Invalid choice.")
+        return
+    
     conn.commit()
     cursor.close()
     conn.close()
     print("Artist deleted successfully!")
 
-# Function to search and display artist by ID
-def search_artist_by_id():
-    artist_id = int(input("Enter artist ID to search: "))
-    
+# Function to search and display artist by ID or name
+def search_artist():
+    choice = input("Search by (1) ID or (2) Name? Enter choice: ")
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM artists WHERE id = %s", (artist_id,))
-    artist = cursor.fetchone()
     
+    if choice == '1':
+        artist_id = int(input("Enter artist ID to search: "))
+        cursor.execute("SELECT * FROM artists WHERE id = %s", (artist_id,))
+    elif choice == '2':
+        name = input("Enter artist's name to search: ")
+        cursor.execute("SELECT * FROM artists WHERE name = %s", (name,))
+    else:
+        print("Invalid choice.")
+        return
+    
+    artist = cursor.fetchone()
     if artist:
         print(tabulate([artist], headers=["ID", "Name", "Bio", "Contact Info"], tablefmt="pretty"))
     else:
@@ -150,7 +167,7 @@ def main():
         print("4. Add Sale")
         print("5. Display All Details")
         print("6. Delete Artist")
-        print("7. Search Artist by ID")
+        print("7. Search Artist by ID or Name")
         print("8. Exit")
         choice = input("Enter your choice: ")
 
@@ -167,7 +184,7 @@ def main():
         elif choice == '6':
             delete_artist()
         elif choice == '7':
-            search_artist_by_id()
+            search_artist()
         elif choice == '8':
             break
         else:
