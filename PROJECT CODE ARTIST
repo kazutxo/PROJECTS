@@ -1,0 +1,177 @@
+import mysql.connector
+from tabulate import tabulate
+
+# Database connection
+def get_db_connection():
+    return mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='admin@123',  # replace with your MySQL password
+        database='art_gallery'
+    )
+
+# Function to add an artist
+def add_artist():
+    name = input("Enter artist's name: ")
+    bio = input("Enter artist's bio: ")
+    contact_info = input("Enter artist's contact info: ")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO artists (name, bio, contact_info) VALUES (%s, %s, %s)",
+        (name, bio, contact_info)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("Artist added successfully!")
+
+# Function to add an artwork
+def add_artwork():
+    artist_id = int(input("Enter artist ID: "))
+    title = input("Enter artwork title: ")
+    medium = input("Enter artwork medium: ")
+    size = input("Enter artwork size: ")
+    creation_date = input("Enter creation date (YYYY-MM-DD): ")
+    description = input("Enter artwork description: ")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO artworks (artist_id, title, medium, size, creation_date, description) VALUES (%s, %s, %s, %s, %s, %s)",
+        (artist_id, title, medium, size, creation_date, description)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("Artwork added successfully!")
+
+# Function to add an exhibition
+def add_exhibition():
+    title = input("Enter exhibition title: ")
+    start_date = input("Enter start date (YYYY-MM-DD): ")
+    end_date = input("Enter end date (YYYY-MM-DD): ")
+    description = input("Enter exhibition description: ")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO exhibitions (title, start_date, end_date, description) VALUES (%s, %s, %s, %s)",
+        (title, start_date, end_date, description)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("Exhibition added successfully!")
+
+# Function to add a sale
+def add_sale():
+    artwork_id = int(input("Enter artwork ID: "))
+    client_name = input("Enter client name: ")
+    sale_date = input("Enter sale date (YYYY-MM-DD): ")
+    price = float(input("Enter sale price: "))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO sales (artwork_id, client_name, sale_date, price) VALUES (%s, %s, %s, %s)",
+        (artwork_id, client_name, sale_date, price)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("Sale recorded successfully!")
+
+# Function to delete an artist
+def delete_artist():
+    artist_id = int(input("Enter artist ID to delete: "))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM artists WHERE id = %s", (artist_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("Artist deleted successfully!")
+
+# Function to search and display artist by ID
+def search_artist_by_id():
+    artist_id = int(input("Enter artist ID to search: "))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM artists WHERE id = %s", (artist_id,))
+    artist = cursor.fetchone()
+    
+    if artist:
+        print(tabulate([artist], headers=["ID", "Name", "Bio", "Contact Info"], tablefmt="pretty"))
+    else:
+        print("Artist not found.")
+    
+    cursor.close()
+    conn.close()
+
+# Function to display all details in a table format
+def display_all_details():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    print("\nArtists:")
+    cursor.execute("SELECT * FROM artists")
+    artists = cursor.fetchall()
+    print(tabulate(artists, headers=["ID", "Name", "Bio", "Contact Info"], tablefmt="pretty"))
+
+    print("\nArtworks:")
+    cursor.execute("SELECT * FROM artworks")
+    artworks = cursor.fetchall()
+    print(tabulate(artworks, headers=["ID", "Artist ID", "Title", "Medium", "Size", "Creation Date", "Description"], tablefmt="pretty"))
+
+    print("\nExhibitions:")
+    cursor.execute("SELECT * FROM exhibitions")
+    exhibitions = cursor.fetchall()
+    print(tabulate(exhibitions, headers=["ID", "Title", "Start Date", "End Date", "Description"], tablefmt="pretty"))
+
+    print("\nSales:")
+    cursor.execute("SELECT * FROM sales")
+    sales = cursor.fetchall()
+    print(tabulate(sales, headers=["ID", "Artwork ID", "Client Name", "Sale Date", "Price"], tablefmt="pretty"))
+
+    cursor.close()
+    conn.close()
+
+# Main function to interact with the user
+def main():
+    while True:
+        print("\nArt Gallery Management System")
+        print("1. Add Artist")
+        print("2. Add Artwork")
+        print("3. Add Exhibition")
+        print("4. Add Sale")
+        print("5. Display All Details")
+        print("6. Delete Artist")
+        print("7. Search Artist by ID")
+        print("8. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            add_artist()
+        elif choice == '2':
+            add_artwork()
+        elif choice == '3':
+            add_exhibition()
+        elif choice == '4':
+            add_sale()
+        elif choice == '5':
+            display_all_details()
+        elif choice == '6':
+            delete_artist()
+        elif choice == '7':
+            search_artist_by_id()
+        elif choice == '8':
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == '__main__':
+    main()
