@@ -1,0 +1,21 @@
+Python is an object-oriented programming (OOP) language. It was created by Guido Van Rossum and released in 1991. It is used for developing desktop GUI applications, websites, and web applications.
+
+Advantages and Features of Python:
+
+1. Simple: Python is a simple and minimalistic language. The pseudo-code nature of Python is one of its greatest strengths.
+
+2. Easy to Learn: Python has an extraordinarily simple syntax, making it easier to learn.
+
+3. Free and Open Source: One can freely distribute copies of this software, read its source code, make changes to it, and use pieces of it in new free programs.
+
+4. High-Level Language: While writing programs in Python, one does not need to worry about low-level details such as managing the memory used by the program.
+
+5. Portable: Python can work on many platforms, such as Linux and Windows.
+
+6. Interpreted: Python does not require compilation to binary. The program is run directly from the source code.
+
+7. Extensible: A Python code can be written in C or C++ language that can be compiled in C/C++ language.
+
+8. Embeddable: Python can be embedded within C/C++ to give scripting capabilities for the program's users.
+
+9. Extensive Libraries: The Python Standard Library is a collection of script modules accessible to a Python program, simplifying the programming process and removing the need to rewrite commonly used commands. They can be used by calling/importing them at the beginning of a script.
