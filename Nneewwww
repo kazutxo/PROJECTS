@@ -1,0 +1,293 @@
+import mysql.connector
+from tabulate import tabulate
+
+# Database connection using context manager
+def get_db_connection():
+    try:
+        return mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='admin@123',  # replace with your MySQL password
+            database='art_gallery'
+        )
+    except mysql.connector.Error as e:
+        print(f"Error connecting to database: {e}")
+        exit()
+
+# Input validation function for integer inputs
+def get_int_input(prompt):
+    while True:
+        try:
+            return int(input(prompt))
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
+
+# Input validation function for float inputs
+def get_float_input(prompt):
+    while True:
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+
+# Generic function to execute SQL queries
+def execute_query(query, params=None):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, params)
+                conn.commit()
+                return cursor
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+
+# Function to add an artist
+def add_artist():
+    name = input("Enter artist's name: ").strip()
+    bio = input("Enter artist's bio: ").strip()
+    contact_info = input("Enter artist's contact info: ").strip()
+
+    if not name or not contact_info:
+        print("Name and contact info are required.")
+        return
+
+    query = "INSERT INTO artists (name, bio, contact_info) VALUES (%s, %s, %s)"
+    params = (name, bio, contact_info)
+    execute_query(query, params)
+    print("Artist added successfully!")
+
+# Function to add an artwork
+def add_artwork():
+    artist_id = get_int_input("Enter artist ID: ")
+    title = input("Enter artwork title: ").strip()
+    medium = input("Enter artwork medium: ").strip()
+    size = input("Enter artwork size: ").strip()
+    creation_date = input("Enter creation date (YYYY-MM-DD): ").strip()
+    description = input("Enter artwork description: ").strip()
+
+    if not title or not medium or not size:
+        print("Title, medium, and size are required.")
+        return
+
+    query = "INSERT INTO artworks (artist_id, title, medium, size, creation_date, description) VALUES (%s, %s, %s, %s, %s, %s)"
+    params = (artist_id, title, medium, size, creation_date, description)
+    execute_query(query, params)
+    print("Artwork added successfully!")
+
+# Function to add an exhibition
+def add_exhibition():
+    title = input("Enter exhibition title: ").strip()
+    start_date = input("Enter start date (YYYY-MM-DD): ").strip()
+    end_date = input("Enter end date (YYYY-MM-DD): ").strip()
+    description = input("Enter exhibition description: ").strip()
+
+    if not title or not start_date or not end_date:
+        print("Title and dates are required.")
+        return
+
+    query = "INSERT INTO exhibitions (title, start_date, end_date, description) VALUES (%s, %s, %s, %s)"
+    params = (title, start_date, end_date, description)
+    execute_query(query, params)
+    print("Exhibition added successfully!")
+
+# Function to add a sale
+def add_sale():
+    artwork_id = get_int_input("Enter artwork ID: ")
+    client_name = input("Enter client name: ").strip()
+    sale_date = input("Enter sale date (YYYY-MM-DD): ").strip()
+    price = get_float_input("Enter sale price: ")
+
+    if not client_name or not sale_date:
+        print("Client name and sale date are required.")
+        return
+
+    query = "INSERT INTO sales (artwork_id, client_name, sale_date, price) VALUES (%s, %s, %s, %s)"
+    params = (artwork_id, client_name, sale_date, price)
+    execute_query(query, params)
+    print("Sale recorded successfully!")
+
+# Function to display all details in a table format
+def display_all_details():
+    queries = {
+        "Artists": "SELECT * FROM artists",
+        "Artworks": "SELECT * FROM artworks",
+        "Exhibitions": "SELECT * FROM exhibitions",
+        "Sales": "SELECT * FROM sales"
+    }
+    headers = {
+        "Artists": ["ID", "Name", "Bio", "Contact Info"],
+        "Artworks": ["ID", "Artist ID", "Title", "Medium", "Size", "Creation Date", "Description"],
+        "Exhibitions": ["ID", "Title", "Start Date", "End Date", "Description"],
+        "Sales": ["ID", "Artwork ID", "Client Name", "Sale Date", "Price"]
+    }
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                for key, query in queries.items():
+                    print(f"\n{key}:")
+                    cursor.execute(query)
+                    data = cursor.fetchall()
+                    print(tabulate(data, headers=headers[key], tablefmt="pretty"))
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+
+# Reporting and Analytics Functions
+def generate_sales_report():
+    query = """
+    SELECT 
+        sales.id AS Sale_ID, 
+        artworks.title AS Artwork_Title, 
+        artists.name AS Artist_Name, 
+        sales.client_name AS Client_Name, 
+        sales.sale_date AS Sale_Date, 
+        sales.price AS Sale_Price
+    FROM sales
+    INNER JOIN artworks ON sales.artwork_id = artworks.id
+    INNER JOIN artists ON artworks.artist_id = artists.id
+    ORDER BY sales.sale_date DESC;
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                data = cursor.fetchall()
+                print("\nSales Report:")
+                print(tabulate(data, headers=["Sale ID", "Artwork Title", "Artist Name", "Client Name", "Sale Date", "Sale Price"], tablefmt="pretty"))
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+
+def generate_popular_artists_report():
+    query = """
+    SELECT 
+        artists.name AS Artist_Name, 
+        COUNT(artworks.id) AS Artwork_Count
+    FROM artists
+    LEFT JOIN artworks ON artists.id = artworks.artist_id
+    GROUP BY artists.id
+    ORDER BY Artwork_Count DESC;
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                data = cursor.fetchall()
+                print("\nPopular Artists Report:")
+                print(tabulate(data, headers=["Artist Name", "Number of Artworks"], tablefmt="pretty"))
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+
+def generate_exhibition_report():
+    query = """
+    SELECT 
+        exhibitions.title AS Exhibition_Title, 
+        COUNT(artworks.id) AS Artworks_Displayed
+    FROM exhibitions
+    LEFT JOIN artworks ON exhibitions.id = artworks.id
+    GROUP BY exhibitions.id
+    ORDER BY exhibitions.start_date DESC;
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                data = cursor.fetchall()
+                print("\nExhibition Attendance Report:")
+                print(tabulate(data, headers=["Exhibition Title", "Artworks Displayed"], tablefmt="pretty"))
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+
+# Advanced Search and Filtering
+def advanced_search():
+    print("\nAdvanced Search Options:")
+    print("1. Search Artists")
+    print("2. Search Artworks")
+    print("3. Search Sales")
+    print("4. Search Exhibitions")
+    choice = input("Enter your choice: ").strip()
+
+    if choice == '1':
+        filter_query = input("Enter filter (e.g., name LIKE '%John%'): ").strip()
+        query = f"SELECT * FROM artists WHERE {filter_query}"
+        display_query_results(query, ["ID", "Name", "Bio", "Contact Info"])
+
+    elif choice == '2':
+        filter_query = input("Enter filter (e.g., title LIKE '%Sunset%' OR medium LIKE '%oil%'): ").strip()
+        query = f"SELECT * FROM artworks WHERE {filter_query}"
+        display_query_results(query, ["ID", "Artist ID", "Title", "Medium", "Size", "Creation Date", "Description"])
+
+    elif choice == '3':
+        filter_query = input("Enter filter (e.g., client_name LIKE '%Smith%' OR price > 5000): ").strip()
+        query = f"SELECT * FROM sales WHERE {filter_query}"
+        display_query_results(query, ["ID", "Artwork ID", "Client Name", "Sale Date", "Price"])
+
+    elif choice == '4':
+        filter_query = input("Enter filter (e.g., title LIKE '%Summer%' OR start_date >= '2024-01-01'): ").strip()
+        query = f"SELECT * FROM exhibitions WHERE {filter_query}"
+        display_query_results(query, ["ID", "Title", "Start Date", "End Date", "Description"])
+
+    else:
+        print("Invalid choice.")
+
+def display_query_results(query, headers):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                data = cursor.fetchall()         
+print(tabulate(data, headers=headers, tablefmt="pretty"))
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+
+# Main function to interact with the user
+def main():
+    while True:
+        print("\nArt Gallery Management System")
+        print("1. Add Artist")
+        print("2. Add Artwork")
+        print("3. Add Exhibition")
+        print("4. Add Sale")
+        print("5. Display All Details")
+        print("6. Delete Artist")
+        print("7. Search Artist by ID or Name")
+        print("8. Update Artist and Related Data")
+        print("9. Generate Sales Report")
+        print("10. Generate Popular Artists Report")
+        print("11. Generate Exhibition Report")
+        print("12. Advanced Search and Filtering")
+        print("13. Exit")
+        choice = input("Enter your choice: ").strip()
+
+        if choice == '1':
+            add_artist()
+        elif choice == '2':
+            add_artwork()
+        elif choice == '3':
+            add_exhibition()
+        elif choice == '4':
+            add_sale()
+        elif choice == '5':
+            display_all_details()
+        elif choice == '6':
+            delete_artist()
+        elif choice == '7':
+            search_artist()
+        elif choice == '8':
+            update_artist()
+        elif choice == '9':
+            generate_sales_report()
+        elif choice == '10':
+            generate_popular_artists_report()
+        elif choice == '11':
+            generate_exhibition_report()
+        elif choice == '12':
+            advanced_search()
+        elif choice == '13':
+            print("Exiting... Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == '__main__':
+    main()
+
