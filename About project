@@ -1,9 +1,0 @@
-The Art Gallery Management System is a notable contribution to the field of art galleries, allowing for easy retrieval and management of data related to artists, artworks, exhibitions, and sales transactions. This user-friendly program provides a comprehensive set of features that ensures efficient data handling.
-
-This program can be used to store detailed information about artists, including their names, bios, and contact details. It also manages artwork information such as titles, mediums, sizes, creation dates, and descriptions. Users can add artworks and search for them by both their titles and the artist ID, making the retrieval process simple and efficient.
-
-Furthermore, the program allows for updating artist information and deleting artists by either their ID or name. It displays available artworks in a well-organized table format and records sales transactions, ensuring all sales are properly documented. When an artwork is sold, the system handles the transaction by recording the sale details and maintaining data integrity.
-
-The program also manages exhibition schedules by allowing the addition of new exhibitions with details such as titles, start dates, end dates, and descriptions. This feature ensures that all exhibition information is readily available and easy to manage. When an exhibition ends, the system can remove the details from the current table and store them in another table for record-keeping.
-
-Overall, this system ensures that all critical operations related to the management of an art gallery are handled efficiently and effectively, providing a comprehensive solution for data management. The user-friendly interface and robust features make it a valuable tool for any art gallery.
