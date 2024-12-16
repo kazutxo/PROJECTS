@@ -6,7 +6,7 @@ def get_db_connection():
     return mysql.connector.connect(
         host='localhost',
         user='root',
-        password='admin@123',  # replace with your MySQL password
+        password='admin@123',
         database='art_gallery'
     )
 
